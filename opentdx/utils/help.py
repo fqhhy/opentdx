@@ -243,7 +243,7 @@ def unpack_futures(data, code_len: int = 23):
             'u3': [u3, u4, u5, u6],
         }
 
-def unpack_by_type(unusual_type: int, data: bytearray) -> tuple[str, str]:
+def unpack_by_type(unusual_type: int, data: bytearray) -> tuple[str, str, int, float, float, float]:
     v1, v2, v3, v4 = struct.unpack('<B3f', data)
     desc = ""
     val = ""
@@ -317,4 +317,4 @@ def unpack_by_type(unusual_type: int, data: bytearray) -> tuple[str, str]:
     elif unusual_type == 0x1e:
         desc = "急速下跌"
         val = f"{v2*100:.2f}%"
-    return desc, val
+    return desc, val, v1, v2, v3, v4

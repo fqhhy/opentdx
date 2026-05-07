@@ -246,7 +246,7 @@ class TestMacQuotationClientExchange:
         
         # 筛选 symbol 为 601066 的行
         # 注意：symbol 在 DataFrame 中可能是 int 或 string 类型，这里假设是 int，如果是 string 请改为 '601066'
-        ah_df = df[df['symbol'] == '601066']
+        ah_df = df[df['code'] == '601066']
         
         # 确保找到了该股票
         assert not ah_df.empty, "未找到 symbol 为 601066 的股票数据"
@@ -271,14 +271,14 @@ class TestMacQuotationClientExchange:
         assert df is not None and not df.empty, "获取的数据为空"
         
         # 验证 000166 的 dq_symbol
-        df_000166 = df[df['symbol'] == '000166']
-        assert not df_000166.empty, "未找到 symbol 为 000166 的股票数据"
+        df_000166 = df[df['code'] == '000166']
+        assert not df_000166.empty, "未找到 code 为 000166 的股票数据"
         target_dq_symbol_166 = df_000166.iloc[0]['dq_symbol']
         assert target_dq_symbol_166 == '880202', f"期望 000166 的 dq_symbol 为 '880202'，实际为 '{target_dq_symbol_166}'"
 
         # 验证 600999 的 dq_symbol
-        df_600999 = df[df['symbol'] == '600999']
-        assert not df_600999.empty, "未找到 symbol 为 600999 的股票数据"
+        df_600999 = df[df['code'] == '600999']
+        assert not df_600999.empty, "未找到 code 为 600999 的股票数据"
         target_dq_symbol_999 = df_600999.iloc[0]['dq_symbol']
         assert target_dq_symbol_999 == '880218', f"期望 600999 的 dq_symbol 为 '880218'，实际为 '{target_dq_symbol_999}'"
         
@@ -297,8 +297,8 @@ class TestMacQuotationClientExchange:
         assert df is not None and not df.empty, "获取的数据为空"
         
         # 验证 000166 的 dq_symbol
-        df_300900 = df[df['symbol'] == '300900']
-        assert not df_300900.empty, "未找到 symbol 为 300900 的股票数据"
+        df_300900 = df[df['code'] == '300900']
+        assert not df_300900.empty, "未找到 code 为 300900 的股票数据"
         target = df_300900.iloc[0]['industry_symbol']
         assert target == '881288', f"期望 300900 的 dq_symbol 为 '881288'，实际为 '{target}'"
 
@@ -318,7 +318,7 @@ class TestMacQuotationClientTickChart:
             'market', 'code', 'name', 'decimal', 'category', 'vol_unit',
             'time', 'pre_close', 'open', 'high', 'low', 'close',
             'momentum', 'vol', 'amount', 'turnover', 'avg',
-            'industry', 'industry_code', 'chart_data'
+            'industry', 'industry_code', 'charts'
         ]
         
         for field in required_fields:
@@ -326,7 +326,7 @@ class TestMacQuotationClientTickChart:
         
         # 验证基本信息正确性
         assert result['code'] == '000001', f"股票代码错误: {result['code']}"
-        assert result['market'] == MARKET.SZ.value, f"市场代码错误: {result['market']}"
+        assert result['market'] == MARKET.SZ, f"市场代码错误: {result['market']}"
         assert isinstance(result['name'], str) and len(result['name']) > 0, "股票名称不能为空"
         
         # 验证价格字段合理性
@@ -346,10 +346,10 @@ class TestMacQuotationClientTickChart:
         assert result['amount'] >= 0, f"成交额应>=0: {result['amount']}"
         
         # 验证分时图数据
-        assert isinstance(result['chart_data'], list), "chart_data应为列表"
-        if len(result['chart_data']) > 0:
+        assert isinstance(result['charts'], list), "chart_data应为列表"
+        if len(result['charts']) > 0:
             # 验证分时图数据结构
-            first_point = result['chart_data'][0]
+            first_point = result['charts'][0]
             assert 'time' in first_point, "分时图数据点缺少time字段"
             assert 'price' in first_point, "分时图数据点缺少price字段"
             assert 'avg' in first_point, "分时图数据点缺少avg字段"
@@ -369,7 +369,7 @@ class TestMacQuotationClientTickChart:
         
         # 验证基本信息
         assert result['code'] == '600000', f"股票代码错误: {result['code']}"
-        assert result['market'] == MARKET.SH.value, f"市场代码错误: {result['market']}"
+        assert result['market'] == MARKET.SH, f"市场代码错误: {result['market']}"
         
         # 验证时间字段（历史数据应该有具体的时间戳）
         assert result['time'] is not None, "历史数据的时间戳不应为None"
@@ -384,8 +384,8 @@ class TestMacQuotationClientTickChart:
         assert result['pre_close'] > 0, f"昨收价应大于0: {result['pre_close']}"
         assert result['close'] >= 0, f"收盘价应>=0: {result['close']}"
         
-        # 历史数据的chart_data可能为空或包含数据
-        assert isinstance(result['chart_data'], list), "chart_data应为列表"
+        # 历史数据的charts可能为空或包含数据
+        assert isinstance(result['charts'], list), "charts应为列表"
 
     def test_get_symbol_tick_chart_invalid_date(self, mqc):
         """测试无效日期的处理"""
@@ -424,7 +424,7 @@ class TestMacQuotationClientTickChart:
         # 验证返回数据类型
         assert isinstance(result, dict), f"返回类型应为dict，实际为 {type(result)}"
         
-        assert isinstance(result['chart_data'], list), f" result['chart_data'] 返回类型应为list，实际为 {type(result['chart_data'])}"
+        assert isinstance(result['charts'], list), f" result['charts'] 返回类型应为list，实际为 {type(result['charts'])}"
 
 
     def test_get_symbol_tick_chart_hk_with_date(self, meqc):
@@ -464,11 +464,11 @@ class TestMacQuotationClientTickChart:
         result = mqc.get_symbol_tick_chart(MARKET.SZ, '000001')
         
         # 验证chart_data是列表
-        assert isinstance(result['chart_data'], list), "chart_data必须是列表类型"
+        assert isinstance(result['charts'], list), "chart_data必须是列表类型"
         
         # 如果有分时数据，验证每个数据点的结构
-        if len(result['chart_data']) > 0:
-            for i, point in enumerate(result['chart_data']):
+        if len(result['charts']) > 0:
+            for i, point in enumerate(result['charts']):
                 assert isinstance(point, dict), f"第{i}个分时数据点应为字典类型"
                 
                 # 验证必需字段
@@ -543,7 +543,7 @@ class TestMacQuotationClientSymbolQuotes:
         # 验证基本字段存在
         for stock in result["stocks"]:
             assert "market" in stock, "股票数据应包含market字段"
-            assert "symbol" in stock, "股票数据应包含symbol字段"
+            assert "code" in stock, "股票数据应包含code字段"
             assert "pre_close" in stock, "basic字段集应包含pre_close"
             assert "open" in stock, "basic字段集应包含open"
             assert "high" in stock, "basic字段集应包含high"
