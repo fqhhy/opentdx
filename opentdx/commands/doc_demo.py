@@ -1,6 +1,8 @@
 """
 pytdx2 交互式接口文档 — 每个接口独立演示
-用法: python doc.py
+用法: python -m opentdx.commands.doc_demo
+      或 opentdx doc
+      或 opentdx doc --key 05
 """
 
 from collections import OrderedDict
@@ -29,7 +31,6 @@ def demo(key, title):
 
 
 def show(code_str, result=None, comment=None):
-    """展示示例代码及结果。"""
     if comment:
         print(f"  # {comment}")
     print(f"  >>> {code_str}\n{'='*60}")
@@ -38,7 +39,7 @@ def show(code_str, result=None, comment=None):
     print()
 
 
-def run(key, tdx=None):
+def run_demo(key, tdx=None):
     title, func = ITEMS[key]
     print(f"\n{'='*60}")
     print(f"  {key}. {title}")
@@ -507,9 +508,7 @@ def _(_tdx=None):
     client.disconnect()
 
 
-# ======================== 主入口 ========================
-
-TDX_KEYS = {k for k in ITEMS if k.isdigit() and int(k) <= 35}
+# ======================== 菜单 ========================
 
 MENU = """
 ╔════════════════════════════════════════════════════════════════════╗
@@ -550,40 +549,57 @@ MENU = """
 """
 
 
-def main():
-    print(MENU)
-    print("正在连接行情服务器...\n")
+def run_interactive(key=None):
+    """交互式菜单 或 直接运行指定编号的demo"""
     tdx = TdxClient().__enter__()
 
-    while True:
-        choice = input("请输入编号 (0退出, a全部, m菜单): ").strip()
-        if not choice:
-            continue
-
-        if choice == '0':
+    if key:
+        if key not in ITEMS:
+            print(f"无效选项: {key}")
             tdx.__exit__(None, None, None)
-            if _mac_client:
-                _mac_client.disconnect()
-            if _mac_ex_client:
-                _mac_ex_client.disconnect()
-            print("退出。")
-            break
+            return
+        run_demo(key, tdx)
+        tdx.__exit__(None, None, None)
+        return
 
-        if choice.lower() == 'a':
-            for key in ITEMS:
-                run(key, tdx)
-            continue
+    print(MENU)
+    print("正在连接行情服务器...\n")
 
-        if choice.lower() == 'm':
-            print(MENU)
-            continue
+    try:
+        while True:
+            choice = input("请输入编号 (0退出, a全部, m菜单): ").strip()
+            if not choice:
+                continue
 
-        if choice not in ITEMS:
-            print(f"  无效选项: {choice}")
-            continue
+            if choice == '0':
+                break
 
-        run(choice, tdx)
+            if choice.lower() == 'a':
+                for k in ITEMS:
+                    run_demo(k, tdx)
+                continue
+
+            if choice.lower() == 'm':
+                print(MENU)
+                continue
+
+            if choice not in ITEMS:
+                print(f"  无效选项: {choice}")
+                continue
+
+            run_demo(choice, tdx)
+    finally:
+        tdx.__exit__(None, None, None)
+        if _mac_client:
+            _mac_client.disconnect()
+        if _mac_ex_client:
+            _mac_ex_client.disconnect()
+        print("退出。")
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if len(sys.argv) > 1:
+        run_interactive(sys.argv[1])
+    else:
+        run_interactive()
