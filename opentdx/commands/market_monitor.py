@@ -145,18 +145,20 @@ def run_market_monitor(interval: int = 5, count: int = 100, split: bool = True, 
                         try:
                             # 使用上次的 index 作为起始位置，实现增量获取
                             start_index = last_indices[market]
-                            # 首次获取时，设置 count 为 50000. 如果不设置,会导致数BJ/SH的先读取完. 最后仅显示SZ数据
+                            # 首次获取时，使用较大的 count 避免因数据截断导致部分市场数据丢失
                             if start_index == 0:
-                                count = 50000
+                                fetch_count = 50000
+                            else:
+                                fetch_count = count
                             
                             # 获取市场监控数据（直接调用 macQuotationClient 的方法）
-                            monitor_data = client.get_market_monitor(market, start=start_index, count=count)
+                            monitor_data = client.get_market_monitor(market, start=start_index, count=fetch_count)
                             
                             if not monitor_data:
                                 continue
                             
                             # 判断是否还有更多数据：如果返回数量等于请求数量，说明服务器可能还有数据
-                            if len(monitor_data) >= count:
+                            if len(monitor_data) >= fetch_count:
                                 has_more_data = True
                             
                             # 将数据添加到总列表，并添加市场前缀

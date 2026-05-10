@@ -16,7 +16,6 @@ class KlineOffset(BaseParser):
         self.body = struct.pack('<II5x', offset, count)
 
     def deserialize(self, data):
-        print(f"[DEBUG] KlineOffset响应原始数据: {data.hex()}")
         if len(data) < 8:
             return {'total': 0, 'returned': 0}
 

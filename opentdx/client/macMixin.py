@@ -21,7 +21,8 @@ class MacQuotationMixin:
 
     @update_last_ack_time
     def get_board_count(self, market: BOARD_TYPE | EX_BOARD_TYPE):
-        return self.call(BoardList(market))['total']
+        result = self.call(BoardList(market))
+        return result['total'] if result else 0
 
     @update_last_ack_time
     def get_board_list(self, market: BOARD_TYPE | EX_BOARD_TYPE, count=10000):
@@ -33,6 +34,8 @@ class MacQuotationMixin:
         for start in range(0, count, page_size):
             current_count = min(page_size, count - start)
             part = self.call(BoardList(board_type=market, start=start, page_size=current_count))
+            if not part:
+                break
             items = part["items"]
             if len(items) > 0:
                 security_list.extend(items)
@@ -59,6 +62,8 @@ class MacQuotationMixin:
                 sort_type=sort_type, sort_order=sort_order,
                 fields=fields if fields else PresetField.COMMON,
             ))
+            if not rs:
+                break
             part = rs["stocks"]
             if len(part) > 0:
                 security_list.extend(part)
@@ -91,6 +96,8 @@ class MacQuotationMixin:
                 board_symbol=board_symbol, start=start, page_size=current_count,
                 sort_type=sort_type, sort_order=sort_order,
             ))
+            if not rs:
+                break
             part = rs["stocks"]
             if len(part) > 0:
                 security_list.extend(part)
@@ -133,10 +140,12 @@ class MacQuotationMixin:
             parser = SymbolBar(market=market, code=code, period=period, times=times,
                                start=start_pos, count=current_count, fq=fq)
             result = self.call(parser)
+            if not result:
+                break
             part = result.get('charts', [])
             for bar in part:
-                bar['float_shares'] = bar['float_shares'] * 10000  # 万股→股
-                fs = bar.get('float_shares', 0) or 0
+                fs = (bar.get('float_shares') or 0) * 10000  # 万股→股
+                bar['float_shares'] = fs
                 bar['turnover'] = round(bar['vol'] / fs * 100, 2) if fs and bar.get('vol') else 0
             if len(part) > 0:
                 security_list.extend(part)
@@ -181,6 +190,8 @@ class MacQuotationMixin:
                 start=current_start, query_date=query_date,
             )
             result = self.call(parser)
+            if not result:
+                break
             part = result.get('transactions', [])
             if len(part) > 0:
                 transaction_list.extend(part)

@@ -60,9 +60,9 @@ class StandardClient(BaseClient):
             code = quotes.get('code')
             divisor = self._get_divisor(market, code) if market and code else 100
 
-            for item in ['high', 'low', 'open', 'close', 'pre_close', 'neg_price']:
-                quotes[item] /= divisor
-            quotes['open_amount'] *= divisor
+            for item in ('high', 'low', 'open', 'close', 'pre_close', 'neg_price', 'open_amount'):
+                if item in quotes:
+                    quotes[item] /= divisor
             quotes['rise_speed'] = f'{(quotes["rise_speed"] / 100):.2f}%'
             for bid in quotes['handicap']['bid']:
                 bid['price'] /= divisor
@@ -87,7 +87,7 @@ class StandardClient(BaseClient):
                     log.debug("获取流通股本失败 %s: %s", code, e)
 
             # 成交量单位归一化: 手→股 (必须在 turnover 之后)
-            for vol_key in ('vol', 'cur_vol', 'in_vol', 'out_vol', 's_amount'):
+            for vol_key in ('vol', 'cur_vol', 'in_vol', 'out_vol'):
                 if vol_key in quotes and quotes[vol_key]:
                     quotes[vol_key] = quotes[vol_key] * 100
         return quotes_list
@@ -162,11 +162,12 @@ class StandardClient(BaseClient):
         except Exception as e:
             log.warning("获取流通股本失败: %s", e)
 
+        divisor = self._get_divisor(market, code)
         for bar in bars:
-            bar['open'] /= 1000
-            bar['close'] /= 1000
-            bar['high'] /= 1000
-            bar['low'] /= 1000
+            bar['open'] /= divisor
+            bar['close'] /= divisor
+            bar['high'] /= divisor
+            bar['low'] /= divisor
             bar['turnover'] = round(bar['vol'] / float_shares * 100, 2) if float_shares and bar['vol'] else 0
 
         return bars

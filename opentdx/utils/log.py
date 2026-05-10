@@ -14,10 +14,9 @@ else:
 log = logging.getLogger("PYTDX2")
 
 log.setLevel(LOGLEVEL)
-ch = logging.StreamHandler()
-ch.setLevel(LOGLEVEL)
-# create formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# add formatter to ch
-ch.setFormatter(formatter)
-log.addHandler(ch)
+if not log.handlers:
+    ch = logging.StreamHandler()
+    ch.setLevel(LOGLEVEL)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)

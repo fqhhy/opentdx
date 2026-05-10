@@ -269,7 +269,9 @@ def goods_list(market, count, json_fmt):
     from opentdx.client import ExtendedClient
 
     client = ExtendedClient()
-    client.connect().login()
+    if client.connect() is None:
+        raise click.ClickException("连接扩展市场服务器失败")
+    client.login()
     try:
         result = client.call(GoodsList(market=market, count=count))
         _output(result, json_fmt)
@@ -305,7 +307,8 @@ def board(board_type, count, json_fmt):
         except AttributeError:
             raise click.BadParameter(f"无效板块类型: {board_type}")
 
-    client.connect()
+    if client.connect() is None:
+        raise click.ClickException("连接服务器失败")
     try:
         result = client.get_board_list(bt, count=count)
         _output(result, json_fmt)
@@ -344,7 +347,8 @@ def board_members(symbol, count, sort, order, json_fmt):
     else:
         client = MacStandardClient()
 
-    client.connect()
+    if client.connect() is None:
+        raise click.ClickException("连接服务器失败")
     try:
         result = client.get_board_members_quotes(symbol, count=count, sort_type=st, sort_order=so)
         _output(result, json_fmt)
@@ -368,7 +372,8 @@ def s_bars(market, code, period, count, adjust, json_fmt):
     """
     mkt = _parse_market(market)
     client = MacExtendedClient() if isinstance(mkt, EX_MARKET) else MacStandardClient()
-    client.connect()
+    if client.connect() is None:
+        raise click.ClickException("连接服务器失败")
     try:
         result = client.get_symbol_bars(mkt, code, _parse_period(period),
                                         count=count, fq=_parse_adjust(adjust))
@@ -390,7 +395,8 @@ def s_quotes(codes, json_fmt):
     # 根据第一个 code 的市场类型选择客户端
     mkt = pairs[0][0]
     client = MacExtendedClient() if isinstance(mkt, EX_MARKET) else MacStandardClient()
-    client.connect()
+    if client.connect() is None:
+        raise click.ClickException("连接服务器失败")
     try:
         result = client.get_symbol_quotes(pairs)
         _output(result['stocks'] if isinstance(result, dict) else result, json_fmt)
@@ -409,7 +415,8 @@ def monitor(market, count, json_fmt):
     opentdx monitor SZ --count 20
     """
     client = MacStandardClient()
-    client.connect()
+    if client.connect() is None:
+        raise click.ClickException("连接服务器失败")
     try:
         result = client.get_market_monitor(_parse_market(market), count=count)
         _output(result, json_fmt)

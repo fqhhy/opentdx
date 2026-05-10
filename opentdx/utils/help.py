@@ -123,11 +123,13 @@ def get_price(data, pos):
         sign = False
 
     if bdata & 0x80:
-        while True:
+        max_iter = 8
+        while max_iter > 0:
             pos += 1
             bdata = data[pos]
             int_data += (bdata & 0x7f) << pos_byte
             pos_byte += 7
+            max_iter -= 1
 
             if bdata & 0x80:
                 pass
@@ -175,12 +177,11 @@ def to_datetime(num, with_time=False) -> datetime:
 def format_time(time_stamp):
     if time_stamp == 0 or time_stamp == 100:
         return '00:00:00.000'
-    else:
-        time_stamp = str(time_stamp)
-    """
-    format time from reversed_bytes0
-    by using method from https://github.com/rainx/pytdx/issues/187
-    """
+
+    time_stamp = str(time_stamp)
+    if len(time_stamp) < 7:
+        return '00:00:00.000'
+
     time_str = time_stamp[:-6] + ':'
     if int(time_stamp[-6:-4]) < 60:
         time_str += '%s:' % time_stamp[-6:-4]
@@ -197,7 +198,7 @@ def format_time(time_stamp):
     return time_str
 
 def unpack_futures(data, code_len: int = 23):
-    if len(data) == 292 + code_len:
+    if len(data) != 292 + code_len:
         raise Exception("futures data length mismatch")
     
     market, code = struct.unpack(f'<B{code_len}s', data[:1 + code_len])

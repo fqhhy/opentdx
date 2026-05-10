@@ -4,6 +4,7 @@ import time
 import struct
 import zlib
 import functools
+from enum import Enum
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from opentdx.utils.log import log
 from opentdx.utils.heartbeat import HeartBeatThread
@@ -44,9 +45,7 @@ def update_last_ack_time(func):
                 log.debug("perform auto retry on req ")
             ret = None
             if self.raise_exception:
-                to_raise = Exception("calling function error")
-                to_raise.original_exception = current_exception if current_exception else None
-                raise to_raise
+                raise Exception("calling function error") from current_exception
         return ret
     return wrapper
 
@@ -69,7 +68,7 @@ def _normalize_code_list(code_list, code=None):
     if code is not None:
         return [(code_list, code)]
     if (isinstance(code_list, list) or isinstance(code_list, tuple)) \
-            and len(code_list) == 2 and isinstance(code_list[0], int):
+            and len(code_list) == 2 and isinstance(code_list[0], (int, Enum)):
         return [code_list]
     return code_list
 
@@ -242,11 +241,16 @@ class Transport:
                     body_buf = zlib.decompress(body_buf)
                 return body_buf
         except Exception as e:
-            log.debug(str(e))
+            log.warning("send error: %s", e)
             self.connected = False
-            self.client = None
+            if self.client:
+                try:
+                    self.client.close()
+                except OSError:
+                    pass
+                self.client = None
             if self.raise_exception:
-                raise Exception("send error")
+                raise Exception("send error") from e
 
     def download_file(self, fetch_fn, filename: str, filesize=0, report_hook=None):
         file_content = bytearray()
