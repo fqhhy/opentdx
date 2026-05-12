@@ -252,6 +252,10 @@
 | 0x23 | lot_size | `<I` | 每手股数 |
 | 0x25 | speed_pct | `<f` | 涨速 |
 | 0x26 | avg_price | `<f` | 均价 |
+| 0x27 | ipov | `<f` | IPOV |
+| 0x28 | pe_ttm_vol_related | `<f` | 市盈率TTM（与vol相关） |
+| 0x29 | ex_price_placeholder | `<f` | 收盘价占位（与amount相关） |
+| 0x2A | operating_revenue | `<f` | 营业收入(万) |
 | 0x2B | flag_kcb | `<I` | 科创板标志 |
 | 0x2C | flag_bj | `<I` | 北交所标志 |
 | 0x30 | pe_ttm | `<f` | 市盈率TTM |
@@ -265,8 +269,13 @@
 | 0x5C | consecutive_up_days | `<i` | 连涨天(负=连跌) |
 | 0x68 | vol_speed_pct | `<f` | 量涨速% |
 | 0x69 | short_turnover_pct | `<f` | 短换手% |
+| 0x6A | amount_2m | `<f` | 2分钟金额(元) |
+| 0x7A | auction_vol_ratio | `<f` | 竞价量比 |
+| 0x7D | today_indicator | `<f` | 近日指标提示(6:KDJ死叉, 92:阶段放量等) |
+| 0x85 | avg_price_copy | `<f` | 均价(备份) |
 | 0x88 | up_count | `<I` | 上涨家数 |
 | 0x8B | down_count | `<I` | 下跌家数 |
+| 0x8E | constant_neg_one | `<i` | 恒为-1 |
 
 ---
 

@@ -2,6 +2,14 @@
 
 所有值得关注的变化均记录于此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [Unreleased]
+
+### Changed
+
+- **Bitmap 字段更新**：`UNKNOWN_36_AMOUNT_RELATED` (0x2A) 重命名为 `OPERATING_REVENUE`（营业收入），新增 `TODAY_INDICATOR` (0x7D) 近日指标提示字段
+
+---
+
 ## [0.2.3] - 2026-05-10
 
 ### Added

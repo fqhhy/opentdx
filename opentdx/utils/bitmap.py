@@ -74,7 +74,7 @@ class FieldBit(IntEnum):
     IPOV                   = 0x27, '<f', 'IPOV'
     PE_TTM_VOL_RELATED     = 0x28, '<f', '市盈率TTM（与vol相关）'
     EX_PRICE_PLACEHOLDER   = 0x29, '<f', '收盘价占位（与amount相关）'
-    UNKNOWN_36_AMOUNT_RELATED = 0x2A, '<f', '未知字段36（与amount相关）'
+    OPERATING_REVENUE      = 0x2A, '<f', '营业收入(万)'
     FLAG_KCB               = 0x2B, '<I', '科创板标志'  # 688开头→30101 300开头→50101
     FLAG_BJ                = 0x2C, '<I', '北交所标志'
     CIRCULATING_CAPITAL_Z  = 0x2D, '<f', '流通股本Z（单位：万股）'
@@ -120,10 +120,14 @@ class FieldBit(IntEnum):
 
     # ── 0x70-0x8F ──
     AUCTION_VOL_RATIO      = 0x7A, '<f', '竞价量比'
+    TODAY_INDICATOR        = 0x7D, '<f', '近日指标提示' #6:KDJ死叉 92:阶段放量 #TODO导出TDX数据分析这个字段的所有枚举值
     AVG_PRICE_COPY         = 0x85, '<f', '均价(备份)'
     UP_COUNT               = 0x88, '<I', '上涨家数'
     DOWN_COUNT             = 0x8B, '<I', '下跌家数'
     CONSTANT_NEG_ONE       = 0x8E, '<i', '恒为-1'
+
+
+    
 
 
 # 从 FieldBit 自动生成，保持向后兼容
@@ -167,6 +171,7 @@ class PresetField(Enum):
     FUNDAMENTAL = (FieldBit.TOTAL_SHARES, FieldBit.FLOAT_SHARES, FieldBit.EPS, FieldBit.NET_ASSETS)
     ENHANCED = OHLC + (FieldBit.VOL, FieldBit.FLOAT_SHARES, FieldBit.ACTIVITY)
     AH_CODE = OHLC + (FieldBit.VOL, FieldBit.AH_CODE, FieldBit.LOT_SIZE, FieldBit.INDUSTRY)
+    BOARD_STATS = (FieldBit.LIMIT_UP_COUNT, FieldBit.LIMIT_DOWN_COUNT, FieldBit.UP_COUNT, FieldBit.DOWN_COUNT)  # 板块统计
     COMMON = (FieldBit.PRE_CLOSE, FieldBit.OPEN, FieldBit.HIGH, FieldBit.LOW, FieldBit.CLOSE, FieldBit.VOL,
                FieldBit.VOL_RATIO, FieldBit.AMOUNT, FieldBit.TOTAL_SHARES, FieldBit.FLOAT_SHARES, FieldBit.EPS,
                FieldBit.NET_ASSETS, FieldBit.UNKONW_ACTION_PRICE, FieldBit.TOTAL_MARKET_CAP_AB, FieldBit.PE_DYNAMIC,

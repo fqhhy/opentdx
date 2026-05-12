@@ -337,12 +337,13 @@ mc.disconnect()
 
 MAC 协议的 `SymbolQuotes` 和 `BoardMembersQuotes` 使用 20 字节位图动态选择返回字段，避免不必要的数据传输。
 
-```python
+```
 from opentdx.utils.bitmap import FieldBit, PresetField
 
 # 使用预设（推荐）
 fields = PresetField.COMMON     # 常用字段
 fields = PresetField.ENHANCED   # 增强字段（含活跃度）
+fields = PresetField.BOARD_STATS  # 板块统计（涨停数、跌停数、上涨家数、下跌家数）
 fields = PresetField.FULL       # 全量字段
 
 # 自定义字段组合（FieldBit 支持 + 运算符）
@@ -365,7 +366,7 @@ mc.get_board_members_quotes("881001", fields=fields)
 
 MAC 协议的文件下载与 quotation/ex_quotation 协议不同，各有独立实现：
 
-```python
+```
 # StandardClient / ExtendedClient — quotation/ex_quotation 协议
 c = StandardClient().connect().login()
 data = c.download_file('block_gn.dat')           # → bytearray
@@ -446,7 +447,7 @@ data = mc.download_mac_file('block_gn.dat')
 
 ## 十二、线程安全与并发
 
-```python
+```
 import threading
 
 # 方案1: 每线程一个 Client
