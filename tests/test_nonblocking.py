@@ -169,17 +169,22 @@ class TestSyncBackwardCompat:
     def test_get_count(self, sync_client):
         result = sync_client.get_count(MARKET.SZ)
         assert isinstance(result, int)
-        assert result > 0
+        assert result > 1000
 
     def test_get_kline(self, sync_client):
         result = sync_client.get_kline(MARKET.SZ, '000001', PERIOD.DAILY, count=10)
         assert isinstance(result, list)
-        assert len(result) > 0
+        assert len(result) == 10
+        for k in result:
+            assert 'datetime' in k and 'open' in k
+            assert k['high'] >= k['low']
 
     def test_get_quotes(self, sync_client):
         result = sync_client.get_quotes(MARKET.SZ, '000001')
         assert isinstance(result, list)
-        assert len(result) > 0
+        assert len(result) == 1
+        assert result[0]['code'] == '000001'
+        assert result[0]['pre_close'] > 0
 
 
 class TestAsyncBasic:
@@ -193,26 +198,28 @@ class TestAsyncBasic:
     def test_get_count(self, async_client):
         result = async_client.get_count(MARKET.SZ)
         assert isinstance(result, int)
-        assert result > 0
+        assert result > 1000
 
     def test_get_kline(self, async_client):
         result = async_client.get_kline(MARKET.SZ, '000001', PERIOD.DAILY, count=10)
         assert isinstance(result, list)
-        assert len(result) > 0
-        assert 'datetime' in result[0]
+        assert len(result) == 10
+        for k in result:
+            assert 'datetime' in k and 'open' in k
+            assert k['high'] >= k['low']
 
     def test_get_quotes(self, async_client):
         result = async_client.get_quotes(MARKET.SZ, '000001')
         assert isinstance(result, list)
-        assert len(result) > 0
-        assert 'code' in result[0]
+        assert len(result) == 1
+        assert result[0]['code'] == '000001'
+        assert result[0]['pre_close'] > 0
 
     def test_multiple_requests_sequential(self, async_client):
-        """多个顺序请求，每个都有不同的 customize"""
         for i in range(5):
             result = async_client.get_count(MARKET.SZ)
             assert isinstance(result, int)
-            assert result > 0
+            assert result > 1000
 
 
 class TestAsyncConcurrency:
@@ -227,7 +234,7 @@ class TestAsyncConcurrency:
             try:
                 market = MARKET.SZ if thread_id % 2 == 0 else MARKET.SH
                 count = async_client.get_count(market)
-                results[thread_id] = ('count', count)
+                results[thread_id] = count
             except Exception as e:
                 errors.append((thread_id, str(e)))
 
@@ -239,11 +246,9 @@ class TestAsyncConcurrency:
 
         assert len(errors) == 0, f"errors: {errors}"
         assert len(results) == 5
-
-        for tid, (rtype, val) in results.items():
-            assert rtype == 'count'
+        for val in results.values():
             assert isinstance(val, int)
-            assert val > 0
+            assert val > 1000
 
     def test_concurrent_mixed_requests(self, async_client):
         """多线程混合不同类型的请求，验证返回类型正确"""
@@ -254,13 +259,13 @@ class TestAsyncConcurrency:
             try:
                 if thread_id % 3 == 0:
                     r = async_client.get_count(MARKET.SZ)
-                    results[thread_id] = ('count', type(r).__name__)
+                    results[thread_id] = ('count', r)
                 elif thread_id % 3 == 1:
                     r = async_client.get_kline(MARKET.SZ, '000001', PERIOD.DAILY, count=5)
-                    results[thread_id] = ('kline', type(r).__name__, len(r))
+                    results[thread_id] = ('kline', r)
                 else:
                     r = async_client.get_quotes(MARKET.SZ, '000001')
-                    results[thread_id] = ('quotes', type(r).__name__, len(r))
+                    results[thread_id] = ('quotes', r)
             except Exception as e:
                 errors.append((thread_id, str(e)))
 
@@ -273,24 +278,23 @@ class TestAsyncConcurrency:
         assert len(errors) == 0, f"errors: {errors}"
         assert len(results) == 6
 
-        for tid, data in results.items():
-            rtype = data[0]
+        for tid, (rtype, data) in results.items():
             if rtype == 'count':
-                assert data[1] == 'int'
+                assert isinstance(data, int) and data > 1000
             elif rtype == 'kline':
-                assert data[1] == 'list'
-                assert data[2] > 0
+                assert isinstance(data, list) and len(data) == 5
+                assert data[0]['high'] >= data[0]['low']
             elif rtype == 'quotes':
-                assert data[1] == 'list'
-                assert data[2] > 0
+                assert isinstance(data, list) and len(data) == 1
+                assert data[0]['pre_close'] > 0
 
     def test_high_concurrency(self, async_client):
-        """高并发：20 个线程各发请求"""
         errors = []
 
         def worker(_idx):
             try:
-                async_client.get_count(MARKET.SZ)
+                count = async_client.get_count(MARKET.SZ)
+                assert count > 0
             except Exception as e:
                 errors.append(str(e))
 

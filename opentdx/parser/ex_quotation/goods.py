@@ -33,10 +33,13 @@ class F2487(BaseParser):
         active, pre_close, open, high, low, close, u1, price = struct.unpack('<I7f', data[24:56])
         vol, curr_vol, amount = struct.unpack('<IIf', data[56:68])
 
-        a = struct.unpack('<4I', data[68:84])
-        b = struct.unpack('<HII24fB10fHB', data[164:])
-        log.debug("f2487 raw: %s, hex: %s", a, data[84:164].hex())
-        
+        # data[68:84]: 4 x uint32 辅助字段
+        aux_a, aux_b, aux_c, aux_d = struct.unpack('<4I', data[68:84])
+        # data[84:164]: 附加价格/统计 (20 floats, 部分股票为零)
+        extra_stats = struct.unpack('<20f', data[84:164])
+        # data[164:]: 扩展行情尾段
+        tail = struct.unpack('<HII24fB10fHB', data[164:])
+
         return {
             'market': EX_MARKET(market),
             'code': code.decode('gbk').replace('\x00', ''),
@@ -45,10 +48,14 @@ class F2487(BaseParser):
             'open': open,
             'high': high,
             'low': low,
-
+            'close': close,
+            'price': price,
             'vol': vol,
             'curr_vol': curr_vol,
             'amount': amount,
+            'aux': [aux_a, aux_b, aux_c, aux_d],
+            'extra_stats': list(extra_stats),
+            'tail_fields': list(tail),
         }
 
 # > 8824 22 3030303031300000000000000000000000000000000000 0000 0000 3700 0000000000000000
@@ -76,15 +83,16 @@ class F2562(BaseParser):
     def deserialize(self, data):
         count, = struct.unpack('<H', data[:2])
         result = []
-        
+
         for i in range(count):
-            category, name, u, index, switch, u2, u3, u4, u5, u6 = struct.unpack('<H23sHIBfffHH', data[48 * i + 2: 48 * i + 50])
+            category, name, market, index, trade_switch, pre_close, u3, u4, u5, u6 = struct.unpack('<H23sHIBfffHH', data[48 * i + 2: 48 * i + 50])
             result.append({
                 'name': name.decode('gbk').replace('\x00', ''),
                 'category': category,
-                'u': u,
+                'market': market,
                 'index': index,
-                'switch': switch,
-                'code': [u2, u3, u4, u5, u6]
+                'trade_switch': trade_switch,
+                'pre_close': pre_close,
+                'extra': [u3, u4, u5, u6],
             })
         return result

@@ -42,7 +42,7 @@ class FieldBit(IntEnum):
     FLOAT_SHARES           = 0x0B, '<f', '流通股(单位万)'  # 港股为H股数
     EPS                    = 0x0C, '<f', '每股收益'
     NET_ASSETS             = 0x0D, '<f', '净资产'
-    UNKONW_ACTION_PRICE    = 0x0E, '<f', '未知价'  # 国内通常为3/9/12, 美股港股与close相等
+    UNKNOWN_ACTION_PRICE   = 0x0E, '<f', '未知价'  # 国内通常为3/9/12, 美股港股与close相等
     TOTAL_MARKET_CAP_AB    = 0x0F, '<f', 'AB股总市值'  # 港股代表H市值
 
     # ── 0x10-0x1F ──
@@ -169,7 +169,7 @@ class PresetField(Enum):
     AH_CODE = OHLC + (FieldBit.VOL, FieldBit.AH_CODE, FieldBit.LOT_SIZE, FieldBit.INDUSTRY)
     COMMON = (FieldBit.PRE_CLOSE, FieldBit.OPEN, FieldBit.HIGH, FieldBit.LOW, FieldBit.CLOSE, FieldBit.VOL,
                FieldBit.VOL_RATIO, FieldBit.AMOUNT, FieldBit.TOTAL_SHARES, FieldBit.FLOAT_SHARES, FieldBit.EPS,
-               FieldBit.NET_ASSETS, FieldBit.UNKONW_ACTION_PRICE, FieldBit.TOTAL_MARKET_CAP_AB, FieldBit.PE_DYNAMIC,
+               FieldBit.NET_ASSETS, FieldBit.UNKNOWN_ACTION_PRICE, FieldBit.TOTAL_MARKET_CAP_AB, FieldBit.PE_DYNAMIC,
                FieldBit.LOT_SIZE_INFO, FieldBit.DIVIDEND_YIELD, FieldBit.LAST_VOLUME,
                FieldBit.TURNOVER, FieldBit.SOME_BITMAP, FieldBit.DECIMAL_POINT, FieldBit.BUY_PRICE_LIMIT,
                FieldBit.SELL_PRICE_LIMIT, FieldBit.UNKNOWN_34, FieldBit.LOT_SIZE, FieldBit.PRE_IPOV,

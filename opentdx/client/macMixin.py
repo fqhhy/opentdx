@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import date
-import pandas as pd
 
 from .transport import update_last_ack_time, _paginate
 from opentdx.const import (
@@ -42,7 +41,7 @@ class MacQuotationMixin:
                 break
             items = part["items"]
             if len(items) > 0:
-                security_list[0:0] = items
+                security_list = [*items, *security_list]
             if len(items) < current_count:
                 log.debug(f"{msg} 数据量不足，获取结束")
                 break
@@ -70,7 +69,7 @@ class MacQuotationMixin:
                 break
             part = rs["stocks"]
             if len(part) > 0:
-                security_list[0:0] = part
+                security_list = [*part, *security_list]
             if len(part) < current_count:
                 log.debug(f"{msg} 数据量不足，获取结束")
                 break
@@ -104,7 +103,7 @@ class MacQuotationMixin:
                 break
             part = rs["stocks"]
             if len(part) > 0:
-                security_list[0:0] = part
+                security_list = [*part, *security_list]
             if len(part) < current_count:
                 log.debug(f"{msg} 数据量不足，获取结束")
                 break
@@ -120,11 +119,11 @@ class MacQuotationMixin:
         ))
 
     @update_last_ack_time
-    def get_symbol_belong_board(self, symbol: str, market: MARKET) -> pd.DataFrame:
+    def get_symbol_belong_board(self, symbol: str, market: MARKET) -> dict:
         return self.call(SymbolBelongBoard(symbol=symbol, market=market))
 
     @update_last_ack_time
-    def get_symbol_zjlx(self, symbol: str, market: MARKET) -> pd.DataFrame:
+    def get_symbol_zjlx(self, symbol: str, market: MARKET) -> dict:
         if not isinstance(market, MARKET):
             raise TypeError(f"market 参数必须为 MARKET 类型，当前类型: {type(market).__name__}")
         return self.call(SymbolCapitalFlow(symbol=symbol, market=market))
@@ -152,7 +151,7 @@ class MacQuotationMixin:
                 bar['float_shares'] = fs
                 bar['turnover'] = round(bar['vol'] / fs * 100, 2) if fs and bar.get('vol') else 0
             if len(part) > 0:
-                security_list[0:0] = part
+                security_list = [*part, *security_list]
             if len(part) < current_count:
                 log.debug(f"{msg} 数据量不足,获取结束")
                 break
@@ -198,7 +197,7 @@ class MacQuotationMixin:
                 break
             part = result.get('transactions', [])
             if len(part) > 0:
-                transaction_list[0:0] = part
+                transaction_list = [*part, *transaction_list]
             if len(part) < current_count:
                 log.debug(f"{msg} 数据量不足，获取结束")
                 break

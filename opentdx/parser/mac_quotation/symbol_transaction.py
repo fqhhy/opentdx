@@ -12,7 +12,7 @@ class SymbolTransaction(BaseParser):
         self.body = struct.pack("<H22sIIH10x", market.value, code.encode("gbk"), ymd, start, count)
 
     def deserialize(self, data):
-        market, code, query_date, count, start, total = struct.unpack("<H22sIxHII", data[:39])
+        market, code, query_date, flag, count, start, total = struct.unpack("<H22sIBHII", data[:39])
 
         transactions = []
         for i in range(count):
@@ -30,6 +30,7 @@ class SymbolTransaction(BaseParser):
             "market": MARKET(market) if not self.is_ex else EX_MARKET(market),
             "code": code.decode("gbk", errors="ignore").replace('\x00', ''),
             "query_date": query_date,
+            "flag": flag,
             "count": count,
             "start": start,
             "total": total,

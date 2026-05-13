@@ -23,13 +23,14 @@ class TickCharts(BaseParser):
             ticks = []
             for t in range(page_size):
                 index = d * page_size + t
-                minutes, price, avg, vol, _  = struct.unpack_from('<HffHH', data, 71 + index * 14)
-                
+                minutes, price, avg, vol, tick_reserved  = struct.unpack_from('<HffHH', data, 71 + index * 14)
+
                 ticks.append({
                     'minutes': time(minutes // 60, minutes % 60),
                     'price': price,
                     'avg': avg,
-                    'vol': vol
+                    'vol': vol,
+                    'tick_reserved': tick_reserved,
                 })
             charts.append({
                 'date': date(pre_closes[d] // 10000, (pre_closes[d] % 10000) // 100, pre_closes[d] % 100),
@@ -37,7 +38,8 @@ class TickCharts(BaseParser):
                 'ticks': ticks
             })
 
-        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12x2fI", data, 71 + count * page_size * 14)
+        tail_offset = 71 + count * page_size * 14
+        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, tail_pad2, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12s2fI", data, tail_offset)
 
         return {
             'market': MARKET(market) if not self.is_ex else EX_MARKET(market),
@@ -58,5 +60,7 @@ class TickCharts(BaseParser):
             'turnover': turnover,
             'avg': avg,
             'industry': industry,
-            'charts': charts
+            'charts': charts,
+            'send_last': send_last,
+            'tail_pad': tail_pad2.hex(),
         }

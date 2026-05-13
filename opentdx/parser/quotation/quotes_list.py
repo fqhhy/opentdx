@@ -64,8 +64,10 @@ class QuotesList(BaseParser):
                     'vol': ask_vol,
                 })
 
-            unknown, rise_speed, short_turnover, min2_amount, opening_rush, _, vol_rise_speed, depth, _, active2 = struct.unpack('<Hhhfh10sff24sH', data[pos: pos + 56])
+            unknown, rise_speed, short_turnover, min2_amount, opening_rush, extra_pair, vol_rise_speed, depth, extra_meta, active2 = struct.unpack('<Hhhfh10sff24sH', data[pos: pos + 56])
             pos += 56
+            # extra_pair(10s): 前2字节为 active_flag + decimal，后8字节为附加数据
+            active_flag, decimal = struct.unpack('<BB', extra_pair[:2])
 
             stocks.append({
                 'market': MARKET(market),
@@ -93,6 +95,9 @@ class QuotesList(BaseParser):
                 'short_turnover': short_turnover,
                 'min2_amount': min2_amount,
                 'opening_rush': opening_rush,
+                'active_flag': active_flag,
+                'decimal': decimal,
+                'extra_meta': extra_meta.hex(),
                 'vol_rise_speed': vol_rise_speed,
                 'depth': depth,
                 'active': active1,

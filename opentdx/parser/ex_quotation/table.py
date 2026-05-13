@@ -10,7 +10,14 @@ class Table(BaseParser):
 
     @override
     def deserialize(self, data):
+        # data[0:35]: header — 32 bytes reserved + category(H) + flag(B) + tail(B)
+        reserved_header = data[:32]
+        category, flag, tail_byte = struct.unpack('<HBB', data[32:35])
         start, = struct.unpack('<I', data[35:39])
+        # data[39:55]: server echo (16 bytes, mirrors request id)
+        server_echo = data[39:55]
+        # data[55:161]: mostly zero padding with occasional flags
+        flag2, = struct.unpack('<B', data[116:117])
         count, ctx_len = struct.unpack('<II', data[161:169])
-        ctx = data[169:].decode('gbk',errors='ignore').replace('\x00', '')
+        ctx = data[169:].decode('gbk', errors='ignore').replace('\x00', '')
         return start, count, ctx

@@ -3,7 +3,6 @@ import struct
 
 from typing import override
 
-import pandas as pd
 from opentdx.const import MARKET
 from opentdx.parser.baseParser import BaseParser, register_parser
 
@@ -20,23 +19,40 @@ class SymbolBelongBoard(BaseParser):
 
     @override
     def deserialize(self, data):
-        market, query_info_str, ext = struct.unpack("<H12s5x8s", data[:27])
+        market, query_info, ext = struct.unpack("<H12s5x8s", data[:27])
 
         list_raw = struct.unpack(f"<{len(data) - 27}s", data[27:])[0]
         python_list = json.loads(list_raw.decode("gbk"))
 
-        df = pd.DataFrame()
-        if len(python_list) > 0:
-            if len(python_list[0]) == 9:
-                columns = ["board_type", "market", "board_symbol", "board_symbol_name", "close", "pre_close", "涨停数", "跌停数", "最相似"]
-            elif len(python_list[0]) == 13:
-                columns = ["board_type", "market", "board_symbol", "board_symbol_name", "close", "pre_close",
+        result = {
+            "data": [],
+            "query_info": query_info.hex(),
+            "ext": ext.hex(),
+        }
+
+        if python_list:
+            first_row = python_list[0]
+            n = len(first_row)
+
+            if n == 9:
+                keys = ["board_type", "market", "board_symbol", "board_symbol_name", "close", "pre_close", "涨停数", "跌停数", "最相似"]
+            elif n == 13:
+                keys = ["board_type", "market", "board_symbol", "board_symbol_name", "close", "pre_close",
                         "speed_pct", "symbol_market", "symbol", "symbol_name", "symbol_close", "symbol_pre_close", "symbol_speed_pct"]
             else:
-                raise ValueError("不支持的字段数量")
+                keys = None
 
-            df = pd.DataFrame(python_list, columns=columns)
-            for col in ["close", "pre_close"]:
-                df[col] = pd.to_numeric(df[col], errors="coerce")
+            if keys:
+                for row in python_list:
+                    d = dict(zip(keys, row))
+                    for col in ("close", "pre_close"):
+                        if col in d:
+                            try:
+                                d[col] = float(d[col])
+                            except (ValueError, TypeError):
+                                pass
+                    result["data"].append(d)
+            else:
+                result["data"] = python_list
 
-        return df
+        return result

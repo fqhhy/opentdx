@@ -2,7 +2,6 @@ import json
 import struct
 from typing import override
 
-import pandas as pd
 from opentdx.const import MARKET
 from opentdx.parser.baseParser import BaseParser, register_parser
 
@@ -14,25 +13,34 @@ class SymbolCapitalFlow(BaseParser):
 
     @override
     def deserialize(self, data):
-        market, query_info_str, ext = struct.unpack("<H12s5x8s", data[:27])
+        market, query_info, ext = struct.unpack("<H12s5x8s", data[:27])
 
         list_raw = struct.unpack(f"<{len(data) - 27}s", data[27:])[0]
         python_list = json.loads(list_raw.decode("gbk"))
 
-        df = pd.DataFrame()
+        result = {
+            "data": None,
+            "query_info": query_info.hex(),
+            "ext": ext.hex(),
+        }
+
         if len(python_list) >= 2:
             today_data = python_list[0]
             five_days_data = python_list[1]
-            columns = [
+            keys = [
                 "今日主力流入", "今日主力流出", "今日散户流入", "今日散户流出",
                 "5日主买", "5日主卖", "5日超大单净额", "5日大单净额", "5日中单净额", "5日小单净额",
             ]
             merged_data = today_data + five_days_data
-            df = pd.DataFrame([merged_data], columns=columns)
-            for col in columns:
-                df[col] = pd.to_numeric(df[col], errors="coerce")
-            df["今日主力净流入"] = df["今日主力流入"] - df["今日主力流出"]
-            df["今日散户净流入"] = df["今日散户流入"] - df["今日散户流出"]
-            df["5日主力净流入"] = df["5日主买"] - df["5日主卖"]
+            d = dict(zip(keys, merged_data))
+            for k in keys:
+                try:
+                    d[k] = float(d[k])
+                except (ValueError, TypeError):
+                    pass
+            d["今日主力净流入"] = d["今日主力流入"] - d["今日主力流出"]
+            d["今日散户净流入"] = d["今日散户流入"] - d["今日散户流出"]
+            d["5日主力净流入"] = d["5日主买"] - d["5日主卖"]
+            result["data"] = d
 
-        return df
+        return result

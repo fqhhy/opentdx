@@ -12,7 +12,7 @@ class SymbolTickChart(BaseParser):
         self.body = struct.pack("<H22sI5H", market.value, code.encode("gbk"), ymd, 1, 0, 0, 0, 0)
 
     def deserialize(self, data):
-        market, code, date_raw, u, price, count = struct.unpack("<H22sIBfH", data[:35])
+        market, code, query_date, reserved_flags, ref_price, count = struct.unpack("<H22sIBfH", data[:35])
 
         charts = []
         for i in range(count):
@@ -25,7 +25,8 @@ class SymbolTickChart(BaseParser):
                 "momentum": momentum
             })
 
-        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12x2fI", data, 35 + count * 18)
+        tail_offset = 35 + count * 18
+        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, tail_pad2, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12s2fI", data, tail_offset)
 
         return {
             "market": MARKET(market) if not self.is_ex else EX_MARKET(market),
@@ -46,5 +47,9 @@ class SymbolTickChart(BaseParser):
             "turnover": turnover,
             "avg": avg,
             "industry": industry,
-            "charts": charts
+            "charts": charts,
+            "query_date": query_date,
+            "reserved_flags": reserved_flags,
+            "ref_price": ref_price,
+            "tail_pad": tail_pad2.hex(),
         }

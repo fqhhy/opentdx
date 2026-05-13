@@ -265,18 +265,9 @@ def goods_list(market, count, json_fmt):
     opentdx goods-list 1 --count 10       (上期所)
     opentdx goods-list 30 --count 5       (橡胶)
     """
-    from opentdx.parser.mac_quotation.GoodsList import GoodsList
-    from opentdx.client import ExtendedClient
-
-    client = ExtendedClient()
-    if client.connect() is None:
-        raise click.ClickException("连接扩展市场服务器失败")
-    client.login()
-    try:
-        result = client.call(GoodsList(market=market, count=count))
+    with TdxClient() as c:
+        result = c.goods_varieties(market, count=count)
         _output(result, json_fmt)
-    finally:
-        client.disconnect()
 
 
 # ==================== MAC 协议 ====================

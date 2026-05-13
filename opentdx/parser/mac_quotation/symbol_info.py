@@ -11,11 +11,13 @@ class SymbolInfo(BaseParser):
         self.body = struct.pack('<H22sI12x', market.value, code.encode('gbk'), 1)
 
     def deserialize(self, data):
+        # data[0:8]: padding (all zeros)
         market, code, name = struct.unpack_from('<H22s44s', data, 8)
 
+        # data[76:96]: padding (all zeros)
         date_raw, time_raw, activity, pre_close, open, high, low, close, momentum, vol, amount, inside_volume, outside_volume = struct.unpack_from('<III5ffIfII', data, 96)
         decimal, a, b, c, vr, turnover, avg = struct.unpack_from('<HIf20xI3f', data, 148)
-        
+
         return {
             'market': MARKET(market) if not self.is_ex else EX_MARKET(market),
             'code': code.decode("gbk").rstrip('\x00'),
@@ -36,4 +38,5 @@ class SymbolInfo(BaseParser):
             'vr': vr,
             'turnover': turnover,
             'avg': avg,
+            'extra': [a, b, c],
         }

@@ -13,7 +13,7 @@ from .symbol_info import SymbolInfo
 from .kline_offset import KlineOffset
 from .server_info import ServerInfo
 from .file_query import FileList, FileDownload
-from .GoodsList import GoodsList
+from .goods_list import GoodsList
 
 __all__ = [
     "BoardList",

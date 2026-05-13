@@ -15,13 +15,12 @@ class SymbolBar(BaseParser):
 
     @override
     def deserialize(self, data):
-        market, symbol, period, unknown, count, start = struct.unpack_from("<H12s10xBHHI", data)
-        
+        market, symbol, period, category_flag, count, start = struct.unpack_from("<H12s10xBHHI", data)
+
         charts = []
         for i in range(count):
             ymd, time_num, open, high, low, close, amount, vol, float_shares = struct.unpack_from("<II7f", data, 33 + i * 36)
 
-            # 如果是美股或者期货, time_num是中国时间, 但ymd是美国日期. 例如 2026-03-26 22:30:00 的k线, TDX数据返回的是 2026-03-25 22:30:00 
             charts.append({
                 "datetime": combine_to_datetime(ymd, time_num, period < 4 or period == 7 or period == 8),
                 "open": open,
@@ -30,10 +29,11 @@ class SymbolBar(BaseParser):
                 "close": close,
                 "vol": vol,
                 "amount": amount,
-                "float_shares": float_shares,  # 万股
+                "float_shares": float_shares,
             })
 
-        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12x2fI", data, 33 + count * 36)
+        tail_offset = 33 + count * 36
+        name, decimal, category, vol_unit, date_raw, time_raw, pre_close, open, high, low, close, momentum, vol, amount, tail_pad2, turnover, avg, industry = struct.unpack_from("<44sBHf5x2I5ffIf12s2fI", data, tail_offset)
 
         return {
             "market": MARKET(market) if not self.is_ex else EX_MARKET(market),
@@ -57,5 +57,7 @@ class SymbolBar(BaseParser):
             "period": PERIOD(period),
             "count": count,
             "start": start,
-            "charts": charts
+            "charts": charts,
+            "category_flag": category_flag,
+            "tail_pad": tail_pad2.hex(),
         }

@@ -17,12 +17,12 @@ class BoardList(BaseParser):
         # 外部传入 page_size , count_all 会是两倍. 这是将 board_info 和 symbol_info 都累加了
         count = count_all // 2
 
-        fmt = "<H6s16x44sfff H6s16x44sfff"
+        fmt = "<H6s16s44sfff H6s16s44sfff"
         fmt_length = struct.calcsize(fmt)
 
         result = []
         for i in range(count):
-            market, code, name, price, rise_speed, pre_close, symbol_market, symbol_code, symbol_name, symbol_price, symbol_rise_speed, symbol_pre_close = struct.unpack(fmt, data[i * 160 + 4 : i * 160 + 4 + fmt_length])
+            market, code, pad1, name, price, rise_speed, pre_close, symbol_market, symbol_code, pad2, symbol_name, symbol_price, symbol_rise_speed, symbol_pre_close = struct.unpack(fmt, data[i * 160 + 4 : i * 160 + 4 + fmt_length])
             result.append({
                 "market": MARKET(market) if market <= 3 else EX_MARKET(market),
                 "code": code.decode("gbk").replace("\x00", ""),
@@ -36,6 +36,8 @@ class BoardList(BaseParser):
                 "symbol_price": symbol_price,
                 "symbol_rise_speed": symbol_rise_speed,
                 "symbol_pre_close": symbol_pre_close,
+                "pad1": pad1.hex(),
+                "pad2": pad2.hex(),
             })
 
         return {"total": total, "items": result}

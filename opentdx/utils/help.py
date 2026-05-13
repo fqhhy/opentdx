@@ -29,9 +29,8 @@ def query_market(code) -> MARKET | None:
         return MARKET.SH
     elif code.startswith(("4", "8")):
         return MARKET.BJ
-    else:
-        log.error("unknown market code: {}".format(code))
-        return None
+    log.error("unknown market code: %s", code)
+    return None
 
 
 # 根据可视化的板块id获取到系统需要的真实板块code
@@ -198,8 +197,8 @@ def format_time(time_stamp):
     return time_str
 
 def unpack_futures(data, code_len: int = 23):
-    if len(data) != 292 + code_len:
-        raise Exception("futures data length mismatch")
+    if len(data) < 291 + code_len:
+        raise Exception(f"futures data too short: {len(data)} < {291 + code_len}")
     
     market, code = struct.unpack(f'<B{code_len}s', data[:1 + code_len])
     active, pre_close, open, high, low, close, open_position, add_position, vol, curr_vol, amount, in_vol, out_vol, u14, hold_position = struct.unpack(f'<I5f4If4I', data[1 + code_len: 61 + code_len])

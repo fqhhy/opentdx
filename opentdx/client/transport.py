@@ -59,29 +59,31 @@ def update_last_ack_time(func):
         if ht and ht.is_alive():
             ht.update_last_ack_time()
 
-        current_exception = None
         try:
-            ret = func(self, *args, **kw)
-        except Exception as e:
-            current_exception = e
-            log.debug("hit exception on req exception is " + str(e))
-            if self.auto_retry:
-                for time_interval in self.retry_strategy.gen():
-                    try:
-                        time.sleep(time_interval)
-                        self.disconnect()
-                        self.connect(self.ip, self.port)
-                        ret = func(self, *args, **kw)
-                        if ret:
-                            return ret
-                    except Exception as retry_e:
-                        current_exception = retry_e
-                        log.debug("hit exception on *retry* req exception is " + str(retry_e))
-                log.debug("perform auto retry on req ")
-            ret = None
+            return func(self, *args, **kw)
+        except Exception:
+            if not self.auto_retry:
+                if self.raise_exception:
+                    raise
+                return None
+
+            log.debug("request failed, starting auto retry")
+            last_exception = None
+            for time_interval in self.retry_strategy.gen():
+                try:
+                    time.sleep(time_interval)
+                    self.disconnect()
+                    self.connect(self.ip, self.port)
+                    ret = func(self, *args, **kw)
+                    if ret is not None:
+                        return ret
+                except Exception as e:
+                    last_exception = e
+                    log.debug("retry failed: %s", e)
+
             if self.raise_exception:
-                raise Exception("calling function error") from current_exception
-        return ret
+                raise last_exception if last_exception else RuntimeError("auto retry exhausted")
+            return None
     return wrapper
 
 
@@ -178,6 +180,12 @@ class Transport:
                     break
                 log.warning("reader loop error: %s", e)
                 self._dispatcher.reject_all(e)
+                if self.client:
+                    try:
+                        self.client.close()
+                    except OSError:
+                        pass
+                self.client = None
                 self.connected = False
                 break
         log.debug("reader loop exited")

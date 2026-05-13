@@ -21,7 +21,7 @@ class ServerInfo(BaseParser):
         flags = data[pos:pos + 8]; pos += 8
         # 3 bytes tag ("-1")
         tag = data[pos:pos + 3].decode('ascii', errors='replace').rstrip('\x00'); pos += 3
-        # 9 bytes reserved
+        # 9 bytes reserved (all zeros)
         pos += 9
 
         def _parse_session(p):
@@ -63,6 +63,8 @@ class ServerInfo(BaseParser):
         val1, = struct.unpack_from('<I', data, pos); pos += 4
         val2, = struct.unpack_from('<I', data, pos); pos += 4
 
+        extra = data[pos:] if pos < len(data) else b''
+
         return {
             'count': count,
             'flags': flags.hex(),
@@ -78,4 +80,5 @@ class ServerInfo(BaseParser):
             'ts3': ts3,
             'market_param_1': val1,
             'market_param_2': val2,
+            'extra': extra.hex() if extra else '',
         }

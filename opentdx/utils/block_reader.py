@@ -6,6 +6,8 @@ import pandas as pd
 import os
 from io import BytesIO
 
+BLOCK_FIXED_SIZE = 2800  # 通达信板块文件每条记录固定占用 2800 字节
+
 """
 参考这个 http://blog.csdn.net/Metal1/article/details/44352639
 
@@ -67,7 +69,7 @@ class BlockReader(BaseReader):
                     ])
                 )
 
-            pos = block_stock_begin + 2800
+            pos = block_stock_begin + BLOCK_FIXED_SIZE
 
         return result
 

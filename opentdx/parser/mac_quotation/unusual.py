@@ -16,10 +16,12 @@ class Unusual(BaseParser): # 主力监控，不需要Login()
         count, = struct.unpack('<H', data[:2])
         results = []
         for i in range(count):
-            market, code, _, unusual_type, _, index, z = struct.unpack('<H6sBBBHH', data[32 * i + 2: 32 * i + 17])
-            desc, value, v1, v2, v3, v4 = unpack_by_type(unusual_type, data[32 * i + 17: 32 * i + 30])
-            hour, minute_sec = struct.unpack('<BH', data[32 * i + 31: 32 * i + 34])
-            
+            offset = 32 * i
+            market, code, _, unusual_type, _, index, z = struct.unpack('<H6sBBBHH', data[offset + 2: offset + 17])
+            desc, value, v1, v2, v3, v4 = unpack_by_type(unusual_type, data[offset + 17: offset + 30])
+            flag, = struct.unpack('<B', data[offset + 30: offset + 31])
+            hour, minute_sec = struct.unpack('<BH', data[offset + 31: offset + 34])
+
             results.append({
                 'index': index,
                 'market': MARKET(market),
@@ -32,6 +34,7 @@ class Unusual(BaseParser): # 主力监控，不需要Login()
                 'v2': v2,
                 'v3': v3,
                 'v4': v4,
+                'flag': flag,
             })
 
         binary_length = 2 + count * 32

@@ -12,6 +12,7 @@ class Auction(BaseParser):
 
     def deserialize(self, data):
         market, code, count = struct.unpack_from('<H22sI', data)
+        # data[28:36]: 8 bytes padding (all zeros)
 
         try:
             market = MARKET(market) if not self.is_ex else EX_MARKET(market)

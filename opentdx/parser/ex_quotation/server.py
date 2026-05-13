@@ -35,11 +35,16 @@ class Info(BaseParser):
         maybe_delay, u2, u3, u4, info, version = struct.unpack('<4I25s29s', data[:70])
         u5, u6, u7, u8, u9, date_now, time_now, f1, f2, u15, u16, u17, u18, date2, date3, date4, u22 = struct.unpack('<HHHHHIIffHHHBIIIH', data[70:117])
         server_sign, maybe_switch = struct.unpack('<13sB', data[117:131])
-        
+        # data[131:159]: session_state(H) + session_flag(H) + reserved(24 bytes)
+        session_state, session_flag, reserved_a, reserved_b, reserved_c, reserved_d, reserved_e, reserved_f = struct.unpack('<HH6I', data[131:159])
+
         name, = struct.unpack('<30s', data[159:189])
         a, u23, date5, s0, u24, date6, s1, u25, date7, date8 = struct.unpack('<18s5IB3I', data[189:240])
         server_sign2, = struct.unpack('<13s', data[240:253])
         u26, date9, date10, s2, date11, date12, date13, s3, u28, s4, u29 = struct.unpack('<IIIBIIIBfBH', data[253:286])
+        # data[286:311]: server_params(20 bytes) + extra_flag(B)
+        server_params, extra_flag = struct.unpack('<20sB', data[286:307])
+        extra_reserved = data[307:311]
         date14, u30, date15, u31 = struct.unpack('<IfIf', data[311:327])
         
         time_now = datetime(date_now // 10000, date_now % 10000 // 100, date_now % 100, time_now // 10000, time_now % 10000 // 100, time_now % 100)
@@ -50,5 +55,10 @@ class Info(BaseParser):
             'server_sign': server_sign.decode('gbk').replace('\x00', ''),
             'time_now': time_now.strftime('%Y-%m-%d %H:%M:%S'),
             'server_sign2': server_sign2.decode('gbk').replace('\x00', ''),
-            'name': name.decode('gbk').replace('\x00', '')
+            'name': name.decode('gbk').replace('\x00', ''),
+            'session_state': session_state,
+            'session_flag': session_flag,
+            'server_params': server_params.hex(),
+            'extra_flag': extra_flag,
+            'extra_reserved': extra_reserved.hex(),
         }

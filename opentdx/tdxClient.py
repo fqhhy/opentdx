@@ -50,35 +50,39 @@ class TdxClient:
     """
 
     def __init__(self):
-        self.quotation_client = MacStandardClient(True, True)
-        self.ex_quotation_client = MacExtendedClient(True, True)
+        self._quotation_client = None
+        self._ex_quotation_client = None
 
     # ---- 上下文管理器 ----
 
     def __enter__(self):
-        self.quotation_client.connect().login()
-        self.ex_quotation_client.connect().login()
+        self.q_client().connect().login()
+        self.eq_client().connect().login()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.quotation_client.connected:
-            self.quotation_client.disconnect()
-        if self.ex_quotation_client.connected:
-            self.ex_quotation_client.disconnect()
+        if self._quotation_client and self._quotation_client.connected:
+            self._quotation_client.disconnect()
+        if self._ex_quotation_client and self._ex_quotation_client.connected:
+            self._ex_quotation_client.disconnect()
 
     # ---- 内部 ----
 
     def q_client(self):
-        """获取 A股 客户端（断开时自动重连并登录）。"""
-        if not self.quotation_client.connected:
-            self.quotation_client.connect().login()
-        return self.quotation_client
+        """获取 A股 客户端（首次访问时创建，断开时自动重连并登录）。"""
+        if self._quotation_client is None:
+            self._quotation_client = MacStandardClient(True, True)
+        elif not self._quotation_client.connected:
+            self._quotation_client.connect().login()
+        return self._quotation_client
 
     def eq_client(self):
-        """获取 扩展市场 客户端（断开时自动重连并登录）。"""
-        if not self.ex_quotation_client.connected:
-            self.ex_quotation_client.connect().login()
-        return self.ex_quotation_client
+        """获取 扩展市场 客户端（首次访问时创建，断开时自动重连并登录）。"""
+        if self._ex_quotation_client is None:
+            self._ex_quotation_client = MacExtendedClient(True, True)
+        elif not self._ex_quotation_client.connected:
+            self._ex_quotation_client.connect().login()
+        return self._ex_quotation_client
 
     # ================================================================
     #  A股 — 市场概况

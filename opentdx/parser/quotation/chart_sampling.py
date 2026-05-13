@@ -17,6 +17,8 @@ class ChartSampling(BaseParser):
             return []
 
         market, code = struct.unpack('<H6s', data[:8])
+        # data[8:34]: 16 bytes reserved + uint16 mode + uint16 divisor + 6 bytes padding
+        mode, divisor = struct.unpack('<16xHH6x', data[8:34])
         interval, pre_close, count = struct.unpack('<HfH', data[34:42])
 
         prices = []
@@ -25,5 +27,5 @@ class ChartSampling(BaseParser):
         for i in range(actual_count):
             p, = struct.unpack('<f', data[i * 4 + 42: i * 4 + 46])
             prices.append(p)
-            
+
         return prices
