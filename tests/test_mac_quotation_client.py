@@ -467,8 +467,8 @@ class TestMacQuotationClientSymbolQuotes:
         
         # 验证盘口字段存在
         for stock in result["stocks"]:
-            assert "bid" in stock, "quote字段集应包含bid"
-            assert "ask" in stock, "quote字段集应包含ask"
+            assert "bid_price" in stock, "quote字段集应包含bid_price"
+            assert "ask_price" in stock, "quote字段集应包含ask_price"
             assert "bid_volume" in stock, "quote字段集应包含bid_volume"
             assert "ask_volume" in stock, "quote字段集应包含ask_volume"
             assert "last_volume" in stock, "quote字段集应包含last_volume"
@@ -512,8 +512,8 @@ class TestMacQuotationClientSymbolQuotes:
             assert "pre_close" in stock, "应包含pre_close"
             assert "close" in stock, "应包含close"
             # Quote字段
-            assert "bid" in stock, "应包含bid"
-            assert "ask" in stock, "应包含ask"
+            assert "bid_price" in stock, "应包含bid_price"
+            assert "ask_price" in stock, "应包含ask_price"
 
     def test_get_symbol_quotes_with_fundamental_fields(self, mqc:macQuotationClient):
         """测试使用 fundamental 字段预设获取基本面数据"""

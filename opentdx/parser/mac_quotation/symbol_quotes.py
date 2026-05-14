@@ -59,7 +59,7 @@ class SymbolQuotes(BaseParser):
                         field_name = field_def.name.lower()
                         field_format = field_def.fmt
                     except ValueError:
-                        field_name = f"unknown_field_{bit_pos}"
+                        field_name = f"unknown_field_{bit_pos:#04x}"
                         field_format = '<f'
                         # 尝试用小值整型解释接近0的浮点
                         if field_format == '<f':

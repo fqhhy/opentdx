@@ -6,12 +6,19 @@
 
 ### Added
 
-- **Bitmap 新增字段**：`BID_ASK_RATIO` (0x39) 委比，`BID_ASK_DIFF` (0x8C) 委差，`BID3_VOLUME` (0x86) 买三量，`BID4_VOLUME` (0x87) 买四量，`ASK3_VOLUME` (0x89) 卖三量，`ASK4_VOLUME` (0x8A) 卖四量
+- **十档盘口字段**：识别并命名买卖2-5档价格字段 `BID2_PRICE~BID5_PRICE` (0x48,0x80-0x82)、`ASK2_PRICE~ASK5_PRICE` (0x49,0x83-0x85)
+- **主力资金流字段**：`MAIN_NET_AMOUNT` (0x38) 今日主力净流入、`MAIN_NET_3D_AMOUNT` (0x6F) 近三日/`MAIN_NET_5D_AMOUNT` (0x70) 近五日/`MAIN_NET_10D_AMOUNT` (0x71) 近十日主力净额、`MAIN_BUY_NET_AMOUNT` (0x72) 今日主买净额
+- **其他新字段**：`PREV2_CHANGE_PCT` (0x47) 前日涨幅%、`AUCTION_BUY_LIMIT`/`AUCTION_SELL_LIMIT` (0x66-0x67) 连续竞价上下限
+- **新增预设**：`PresetField.HANDICAP` — 十档盘口（20个价格+量字段）、`PresetField.DEBUG` — 全FF位图探测
+- **字段别名**：`BID2_VOLUME`/`ASK2_VOLUME`/`BID5_VOLUME`/`ASK5_VOLUME` 语义别名，与板块统计字段同值
+- **字段副本**：`MAIN_NET_AMOUNT_COPY` (0x6B) 与 0x38 同值
 
 ### Changed
 
-- **Bitmap 字段更新**：`UNKNOWN_36_AMOUNT_RELATED` (0x2A) 重命名为 `OPERATING_REVENUE`（营业收入），新增 `TODAY_INDICATOR` (0x7D) 近日指标提示字段
-- **Bitmap 字段注释**：`UP_COUNT` (0x88)、`DOWN_COUNT` (0x8B)、`LIMIT_UP_COUNT` (0x5D)、`LIMIT_DOWN_COUNT` (0x5E) 添加股票中实际含义说明（买五量/卖五量/买二量/卖二量）
+- **字段重命名**：`BID`→`BID_PRICE` (0x11)、`ASK`→`ASK_PRICE` (0x12)、`LOW_COPY`→`BID2_PRICE` (0x48)、`LOW_COPY2`→`ASK2_PRICE` (0x49)、`AVG_PRICE_COPY`→`ASK5_PRICE` (0x85)、`UNKNOWN_CLOSE_PRICE`→`MAIN_NET_AMOUNT` (0x38)、`TODAY_INDICATOR`→`RECENT_INDICATOR` (0x7D)
+- **字段注释**：`UP_COUNT/DOWN_COUNT/LIMIT_UP_COUNT/LIMIT_DOWN_COUNT` 更新为板块/个股双语义注释
+- **未知字段命名**：从十进制 `unknown_field_71` 改为十六进制 `unknown_field_0x47`
+- **单测修复**：`bid`/`ask` → `bid_price`/`ask_price`
 
 ---
 

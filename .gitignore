@@ -11,3 +11,4 @@ demo*.py
 /*.csv
 .DS_Store
 ai/
+uv.lock
