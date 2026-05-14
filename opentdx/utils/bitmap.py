@@ -47,8 +47,8 @@ class FieldBit(IntEnum):
 
     # ── 0x10-0x1F ──
     PE_DYNAMIC             = 0x10, '<f', '市盈率(动)'
-    BID                    = 0x11, '<f', '买价'
-    ASK                    = 0x12, '<f', '卖价'
+    BID_PRICE              = 0x11, '<f', '买一价'
+    ASK_PRICE              = 0x12, '<f', '卖一价'
     SERVER_UPDATE_DATE     = 0x13, '<I', '服务器更新日期 YYYYMMDD'
     SERVER_UPDATE_TIME     = 0x14, '<I', '服务器更新时间 HHMMSS'
     LOT_SIZE_INFO          = 0x15, '<I', '未确定'  # 港股:240000500 美股:550000001
@@ -84,7 +84,7 @@ class FieldBit(IntEnum):
     PE_TTM                 = 0x30, '<f', '市盈率TTM'
     PE_STATIC              = 0x31, '<f', '市盈率静'
     # 0x32-0x37 保留
-    UNKNOWN_CLOSE_PRICE    = 0x38, '<f', '美股字段'
+    MAIN_NET_AMOUNT        = 0x38, '<f', '今日主力净流入'
     BID_ASK_RATIO          = 0x39, '<f', '委比'  # (买量-卖量)/(买量+卖量)*100%
     # 0x3A 保留
     CHANGE_20D_PCT         = 0x3B, '<f', '20日涨幅%'
@@ -99,9 +99,9 @@ class FieldBit(IntEnum):
     CHANGE_60D_PCT         = 0x44, '<f', '60日涨幅%'
     CHANGE_5D_PCT          = 0x45, '<f', '5日涨幅%'
     CHANGE_10D_PCT         = 0x46, '<f', '10日涨幅%'
-    # 0x47 保留
-    LOW_COPY               = 0x48, '<f', '最低价(备份)'
-    LOW_COPY2              = 0x49, '<f', '最低价(备份)'
+    PREV2_CHANGE_PCT       = 0x47, '<f', '前日涨幅%'
+    BID2_PRICE             = 0x48, '<f', '买二价'
+    ASK2_PRICE             = 0x49, '<f', '卖二价'
     AH_CODE                = 0x4A, '<I', '对应A/H股code,不足位数前面补0'
     UNKNOWN_CODE           = 0x4B, '<I', '少部分有数据,6位数字'
 
@@ -111,24 +111,36 @@ class FieldBit(IntEnum):
     ACTIVITY               = 0x59, '<I', '活跃度'
     # 0x5A-0x5B 保留
     CONSECUTIVE_UP_DAYS    = 0x5C, '<i', '连涨天'  # 正数连涨，负数连跌
-    LIMIT_UP_COUNT         = 0x5D, '<I', '涨停数（股票中为买二的量）'
-    LIMIT_DOWN_COUNT       = 0x5E, '<I', '跌停数（股票中为卖二的量）'
+    LIMIT_UP_COUNT         = 0x5D, '<I', '涨停数(板块) / 买二量(个股)'
+    BID2_VOLUME            = 0x5D, '<I', '买二量(个股)'  # LIMIT_UP_COUNT 别名
+    LIMIT_DOWN_COUNT       = 0x5E, '<I', '跌停数(板块) / 卖二量(个股)'
+    ASK2_VOLUME            = 0x5E, '<I', '卖二量(个股)'  # LIMIT_DOWN_COUNT 别名
     INDUSTRY_SUB           = 0x5F, '<I', '行业二级分类'
-    # 0x60-0x67 保留
+    # 0x60-0x65 保留
+    AUCTION_BUY_LIMIT      = 0x66, '<f', '连续竞价买入上限'
+    AUCTION_SELL_LIMIT     = 0x67, '<f', '连续竞价卖出下限'
     VOL_SPEED_PCT          = 0x68, '<f', '量涨速%'
     SHORT_TURNOVER_PCT     = 0x69, '<f', '短换手%'
     AMOUNT_2M              = 0x6A, '<f', '2分钟金额(元)'
 
     # ── 0x70-0x8F ──
     AUCTION_VOL_RATIO      = 0x7A, '<f', '竞价量比'
-    TODAY_INDICATOR        = 0x7D, '<f', '近日指标提示' #6:KDJ死叉 92:阶段放量 #TODO导出TDX数据分析这个字段的所有枚举值
-    AVG_PRICE_COPY         = 0x85, '<f', '均价(备份)'
+    RECENT_INDICATOR       = 0x7D, '<f', '近日指标提示' #6:KDJ死叉 92:阶段放量 #TODO导出TDX数据分析这个字段的所有枚举值
+    # 0x7E-0x7F 保留
+    BID3_PRICE             = 0x80, '<f', '买三价'
+    BID4_PRICE             = 0x81, '<f', '买四价'
+    BID5_PRICE             = 0x82, '<f', '买五价'
+    ASK3_PRICE             = 0x83, '<f', '卖三价'
+    ASK4_PRICE             = 0x84, '<f', '卖四价'
+    ASK5_PRICE             = 0x85, '<f', '卖五价'
     BID3_VOLUME            = 0x86, '<I', '买三量'
     BID4_VOLUME            = 0x87, '<I', '买四量'
-    UP_COUNT               = 0x88, '<I', '上涨家数（股票中为买五的量）'
+    UP_COUNT               = 0x88, '<I', '上涨家数(板块) / 买五量(个股)'
+    BID5_VOLUME            = 0x88, '<I', '买五量(个股)'  # UP_COUNT 别名
     ASK3_VOLUME            = 0x89, '<I', '卖三量'
     ASK4_VOLUME            = 0x8A, '<I', '卖四量'
-    DOWN_COUNT             = 0x8B, '<I', '下跌家数（股票中为卖五的量）'
+    DOWN_COUNT             = 0x8B, '<I', '下跌家数(板块) / 卖五量(个股)'
+    ASK5_VOLUME            = 0x8B, '<I', '卖五量(个股)'  # DOWN_COUNT 别名
     BID_ASK_DIFF           = 0x8C, '<i', '委差'  # 买量-卖量
     CONSTANT_NEG_ONE       = 0x8E, '<i', '恒为-1'
 
@@ -172,20 +184,25 @@ class PresetField(Enum):
     NONE = ()
     OHLC = (FieldBit.OPEN, FieldBit.HIGH, FieldBit.LOW, FieldBit.CLOSE)
     BASIC = OHLC + (FieldBit.PRE_CLOSE, FieldBit.VOL)
-    QUOTE = (FieldBit.BID, FieldBit.ASK, FieldBit.BID_VOLUME, FieldBit.ASK_VOLUME, FieldBit.LAST_VOLUME)
+    QUOTE = (FieldBit.BID_PRICE, FieldBit.ASK_PRICE, FieldBit.BID_VOLUME, FieldBit.ASK_VOLUME, FieldBit.LAST_VOLUME)
     VOLUME = (FieldBit.VOL, FieldBit.AMOUNT, FieldBit.TURNOVER, FieldBit.VOL_RATIO)
     FUNDAMENTAL = (FieldBit.TOTAL_SHARES, FieldBit.FLOAT_SHARES, FieldBit.EPS, FieldBit.NET_ASSETS)
     ENHANCED = OHLC + (FieldBit.VOL, FieldBit.FLOAT_SHARES, FieldBit.ACTIVITY)
     AH_CODE = OHLC + (FieldBit.VOL, FieldBit.AH_CODE, FieldBit.LOT_SIZE, FieldBit.INDUSTRY)
     BOARD_STATS = (FieldBit.LIMIT_UP_COUNT, FieldBit.LIMIT_DOWN_COUNT, FieldBit.UP_COUNT, FieldBit.DOWN_COUNT)  # 板块统计
+    HANDICAP = (FieldBit.BID_PRICE, FieldBit.BID2_PRICE, FieldBit.BID3_PRICE, FieldBit.BID4_PRICE, FieldBit.BID5_PRICE,
+                FieldBit.ASK_PRICE, FieldBit.ASK2_PRICE, FieldBit.ASK3_PRICE, FieldBit.ASK4_PRICE, FieldBit.ASK5_PRICE,
+                FieldBit.BID_VOLUME, FieldBit.BID2_VOLUME, FieldBit.BID3_VOLUME, FieldBit.BID4_VOLUME, FieldBit.BID5_VOLUME,
+                FieldBit.ASK_VOLUME, FieldBit.ASK2_VOLUME, FieldBit.ASK3_VOLUME, FieldBit.ASK4_VOLUME, FieldBit.ASK5_VOLUME)  # 十档盘口
     COMMON = (FieldBit.PRE_CLOSE, FieldBit.OPEN, FieldBit.HIGH, FieldBit.LOW, FieldBit.CLOSE, FieldBit.VOL,
                FieldBit.VOL_RATIO, FieldBit.AMOUNT, FieldBit.TOTAL_SHARES, FieldBit.FLOAT_SHARES, FieldBit.EPS,
                FieldBit.NET_ASSETS, FieldBit.UNKNOWN_ACTION_PRICE, FieldBit.TOTAL_MARKET_CAP_AB, FieldBit.PE_DYNAMIC,
                FieldBit.LOT_SIZE_INFO, FieldBit.DIVIDEND_YIELD, FieldBit.LAST_VOLUME,
                FieldBit.TURNOVER, FieldBit.SOME_BITMAP, FieldBit.DECIMAL_POINT, FieldBit.BUY_PRICE_LIMIT,
                FieldBit.SELL_PRICE_LIMIT, FieldBit.UNKNOWN_34, FieldBit.LOT_SIZE, FieldBit.PRE_IPOV,
-               FieldBit.SPEED_PCT, FieldBit.FLAG_KCB, FieldBit.PE_TTM, FieldBit.PE_STATIC, FieldBit.UNKNOWN_CLOSE_PRICE,
+                FieldBit.SPEED_PCT, FieldBit.FLAG_KCB, FieldBit.PE_TTM, FieldBit.PE_STATIC, FieldBit.MAIN_NET_AMOUNT,
                FieldBit.VOL_SPEED_PCT, FieldBit.SHORT_TURNOVER_PCT, FieldBit.CIRCULATING_CAPITAL_Z)
+    DEBUG = ()
     ALL = tuple(FieldBit)
 
     def __add__(self, other) -> FieldSelection:
@@ -286,6 +303,8 @@ def get_active_fields_from_bitmap(bitmap_bytes: bytes) -> list[int]:
 
 def build_bitmap(fields: Fields) -> bytearray:
     """将字段选择转换为 20 字节请求位图"""
+    if isinstance(fields, PresetField) and fields is PresetField.DEBUG:
+        return bytearray(b'\xff' * 20)
     selection = normalize_fields(fields)
     bitmap_int = 0
     for bit in selection:
