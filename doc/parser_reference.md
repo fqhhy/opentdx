@@ -279,6 +279,7 @@
 | 0x69 | short_turnover_pct | `<f` | 短换手% |
 | 0x6A | amount_2m | `<f` | 2分钟金额(元) |
 | 0x6B | main_net_amount_copy | `<f` | 今日主力净流入(副本) |
+| 0x6F | main_net_3d_amount | `<f` | 近三日主力净额 |
 | 0x70 | main_net_5d_amount | `<f` | 近五日主力净额 |
 | 0x7A | auction_vol_ratio | `<f` | 竞价量比 |
 | 0x7D | recent_indicator | `<f` | 近日指标提示(6:KDJ死叉, 92:阶段放量等) |

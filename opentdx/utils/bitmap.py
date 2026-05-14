@@ -123,7 +123,8 @@ class FieldBit(IntEnum):
     SHORT_TURNOVER_PCT     = 0x69, '<f', '短换手%'
     AMOUNT_2M              = 0x6A, '<f', '2分钟金额(元)'
     MAIN_NET_AMOUNT_COPY   = 0x6B, '<f', '今日主力净流入(副本)'  # 与 0x38 相同
-    # 0x6C-0x6F 待识别
+    # 0x6C-0x6E 待识别
+    MAIN_NET_3D_AMOUNT     = 0x6F, '<f', '近三日主力净额'
     MAIN_NET_5D_AMOUNT     = 0x70, '<f', '近五日主力净额'
 
     # ── 0x70-0x8F ──
